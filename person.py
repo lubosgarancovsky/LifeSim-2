@@ -72,6 +72,7 @@ class Person:
         self.got_pregnant = 0
         self.isPregnant = False
         self.child_father = None
+        self.fertility = random.random()
 
         # Health
         self.sick = False
@@ -105,7 +106,7 @@ class Person:
         self.thirst += self.thirst_gene / 5
 
         if self.sick:
-            self.sickness += 0.1
+            self.sickness += 0.07
 
             
 
@@ -132,7 +133,7 @@ class Person:
         if self.age > self.maxAge:
             self.isDead = True
 
-        self.age = (pygame.time.get_ticks() - self.birth) / 5000
+        self.age = (pygame.time.get_ticks() - self.birth) / 3000
 
     def handleWalk(self, settings):
         distance = int(math.hypot(self.pos_x - self.dest_x, self.pos_y - self.dest_y)) / self.speed
@@ -170,14 +171,21 @@ class Person:
 
     def findFood(self, food):
         if self.food_item == None and self.hunger > 40:
-
+            closest_food = food[0]
+            min_distance = 5000
             for item in food:
                 if not item.isEaten:
                     distance = int(math.hypot(self.pos_x - item.pos_x, self.pos_y - item.pos_y))
 
-                    if distance <= self.viewrange:
-                        self.food_item = item
-                        return
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_food = item
+
+
+                if min_distance <= self.viewrange + self.size:
+                    self.food_item = closest_food
+                    return
+
 
     def goEat(self):
         if not self.food_item == None:
@@ -197,23 +205,23 @@ class Person:
                 self.food_item = None
                 self.status = "Wandering"
 
-                self.getSick(0.98)
+                self.getSick(0.997)
 
     def findWater(self, water):
         if self.water_item == None and self.thirst > 40:
             min_distance = 2000
             closest = water[0]
             for item in water:
-                distance = int(math.hypot(self.pos_x - item.pos_x, self.pos_y - item.pos_y))
+                distance = int(math.hypot(self.pos_x - (item.pos_x + item.width / 2), self.pos_y - (item.pos_y + item.height / 2)))
 
                 if distance < min_distance:
                     min_distance = distance
                     closest = item
 
 
-                if min_distance <= self.viewrange:
-                    self.water_item = closest
-                    return
+            if min_distance <= self.viewrange + self.size:
+                self.water_item = closest
+                return
 
     def goDrink(self):
         if not self.water_item == None:
@@ -232,7 +240,7 @@ class Person:
                 self.water_item = None
                 self.status = "Wandering"
 
-                self.getSick(0.98)
+                self.getSick(0.997)
 
     def handleMating(self, people):
         if self.mate == None:
@@ -240,7 +248,7 @@ class Person:
                 if item.gender != self.gender and item.mate == None:
                     distance = int(math.hypot(self.pos_x - item.pos_x, self.pos_y - item.pos_y))
 
-                    if distance < self.viewrange:
+                    if distance < self.viewrange + self.size:
                         if distance < self.size * 2:
                             if self.sick and not item.sick:
                                 item.getSick(0.93)
@@ -282,8 +290,8 @@ class Person:
         if self.gender == 'F' and not self.isPregnant:
             result = random.random()
 
-            if result < 0.6:
-                self.color = (245, 96, 252)
+            if result < self.fertility:
+                self.color = (255, 247, 0)
                 self.got_pregnant = pygame.time.get_ticks()
                 self.isPregnant = True
                 self.child_father = father
@@ -293,7 +301,17 @@ class Person:
             self.isPregnant = False
             self.color  = (self.attractivity* 255, 0, 0)
 
-            num_of_children = random.randint(1, 3)
+            children_num_chance = random.random()
+            num_of_children = 1
+
+            if children_num_chance < 0.8:
+                num_of_children = 1
+
+            if children_num_chance >= 0.8 and children_num_chance < 0.95:
+                num_of_children = 2
+
+            if children_num_chance >= 0.95:
+                num_of_children = 3
 
             for i in range(0, num_of_children):
                 self.awaited_children.append(Person(self.settings, self, self.child_father))

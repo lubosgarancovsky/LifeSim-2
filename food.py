@@ -60,5 +60,5 @@ class FoodItem:
     # If certain time has passed, it grows food item back
     def grow(self):
         timeNow = pygame.time.get_ticks()
-        if timeNow - self.timeGotEaten > 10000:
+        if timeNow - self.timeGotEaten > 15000:
             self.isEaten = False

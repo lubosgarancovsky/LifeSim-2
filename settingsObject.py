@@ -9,9 +9,8 @@ class SettingsObject():
         pygame.init()
 
         # Number of people spawned in the beginning
-        self.males_num = 10
-        self.females_num = 10
-
+        self.males_num = 20
+        self.females_num = 20
         # Display
         self.FULLSCREEN = True
         self.DISPLAY = pygame.display.Info()
